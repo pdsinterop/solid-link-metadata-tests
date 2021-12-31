@@ -11,6 +11,15 @@
         <link rel="stylesheet" href="/assets/design/styles.css">
         <link rel="preload" href="/assets/design/pages.html" as="fetch">
         <title data-simply-field="meta title">SimplyEdit Start</title>
+		<style>
+			/* hyper page incoming/outgoing animation */
+			[data-hyper="outgoing"] {
+				background: red;
+			}
+			[data-hyper="incoming"] {
+				background: green;
+			}
+		</style>
     </head>
     <body>
         <link rel="simply-include" href="/assets/design/pages.html">
@@ -19,12 +28,11 @@
             Header
         </header>
 
-        <main class="hyper-layout hyper-layout-pages" data-simply-list="hyper-pages" data-simply-data="hyper-pages">
+        <main class="hyper-layout hyper-layout-pages" data-simply-list="hyper-pages" data-simply-data="hyper-pages" data-simply-readonly>
             <template>
-                <div data-simply-path="/" data-simply-field="data-simply-path" data-simply-content="attributes" data-simply-attributes="data-simply-path">
+                <div data-simply-path="/" data-simply-field="data-simply-path" data-simply-content="attributes" data-simply-attributes="data-simply-path" data-simply-transformer="hyper-page">
                     <div data-simply-field="data-simply-template" data-simply-content="template">
                         <template data-simply-template="default" rel="default"></template>
-                        <template data-simply-template="bar" rel="bar"></template>
                     </div>
                 </div>
             </template>
@@ -43,14 +51,8 @@
 
         <script src="/assets/js/simplyview/simply.everything.js"></script>
         <script src="/assets/js/settings.js"></script>
-        <script src="//cdn.simplyedit.io/1/simply-edit.js" 
-            data-api-key="muze"
-            data-simply-images="/img/"
-            data-simply-files="/files/"
-            data-simply-settings="seSettings"
-            data-storage-get-post-only
-        ></script>
         <script src="/assets/js/simplyedit-helper.js"></script>
+        <script src="/assets/js/hyperpages.js"></script>
         <script src="/assets/js/app/app.js"></script>
     </body>
 </html>
