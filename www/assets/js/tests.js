@@ -1,17 +1,3 @@
-/*
- promises en qunit:
-	test('success test', function(assert) {
-	    assert.expect(1);
-
-	    var promise = loadGroups(testData);
-
-	    // return the `then` and not the original promise.
-	    return promise.then(function(groups) {
-	        assert.deepEquals(groups.length, 1);
-	    });
-
-	});
-*/
 
 let tests = {
 	writeMeta: () => {
@@ -28,30 +14,37 @@ let tests = {
 		const tmpRed = store.sym(url.href + 'testTempRedirect');
 		const tmpRedTarget = store.sym('https://www.example.com/'); //FIXME: add good target
 
+		// TODO: add permanentRedirect and deleted and one extra redirect to test removeAllRedirects
+
 		store.add(tmpRed, LM('redirectTemporary'), tmpRedTarget);
 
-		return solidApi.write(metaUrl.href, store);
+		return solidApi.write(metaUrl.href, store)
+		.catch(response => {
+			if (response.status==401) {
+				document.getElementById('setIssuer').setAttribute('open','open');
+			}
+		});
 	},
 	temporaryRedirect: () => {
-		return true;
+		return false;
 	},
 	permanentRedirect: () => {
-		return true;
+		return false;
 	},
 	forget: () => {
-		return true;
+		return false;
 	},
 	writeDeleted: () => {
-		return true;
+		return false;
 	},
 	writeTemporaryRedirect: () => {
-		return true;
+		return false;
 	},
 	writePermanentRedirect: () => {
-		return true;
+		return false;
 	},
 	removeAllRedirects: () => {
-		return true;
+		return false;
 	}
 };
 

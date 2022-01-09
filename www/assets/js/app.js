@@ -27,7 +27,8 @@ const app = simply.app({
 		'logout': (el, value) => {
 			app.actions.disconnect()
 			.then(() => {
-				document.getElementById('testServerDialog').setAttribute('open','open');
+				window.location.reload();
+//				document.getElementById('testServerDialog').setAttribute('open','open');
 			});
 		}
     },
@@ -44,7 +45,7 @@ const app = simply.app({
 				if (error.status===401) {
                     document.getElementById('testServerDialog').removeAttribute('open');
 					document.getElementById('setIssuer').setAttribute('open','open');
-					app.view.url = values.url;
+//					app.view.url = values.url;
 				} else {
 					alert(error.message);
 				}
@@ -55,7 +56,7 @@ const app = simply.app({
 			if (url.pathname.substring(url.pathname.length-2)!='/') {
 				url.pathname += '/';
 			}
-			app.view.url = url;
+			app.view.url = url.href;
 			url.pathname += '.meta';
 			return solidApi.fetch(url.href)
 			.then(store => {
@@ -105,12 +106,23 @@ const solidApi = {
 			return store;
 		});
     },
-    write: function(url, store) { //TODO: add content type as param, add to header
-    	let ttl = rdflib.serialize(null, store, url, 'text/turtle');
+    write: function(url, store, contentType='text/turtle') {
+    	let ttl = rdflib.serialize(null, store, url, contentType);
     	console.log(ttl);
-    	return solidSession.fetch(url, {
+    	var fetchParams = {
+//    		mode: 'cors',
+    		headers: {
+    			'Content-Type': contentType
+    		},
     		body: ttl,
     		method: 'PUT'
+    	}
+    	return solidSession.fetch(url, fetchParams).then(response => {
+    		if (response.ok) {
+    			return response;
+    		} else {
+    			throw response;
+    		}
     	});
     },
     connect: function(issuer, resourceUrl) {
