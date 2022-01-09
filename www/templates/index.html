@@ -3,56 +3,101 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" data-simply-field="meta description" content="">
-        <meta name="author" data-simply-field="meta author"content="simplyedit">
+        <meta name="author" data-simply-field="meta author" content="simplyedit">
         <meta name="robots" data-simply-field="meta robots" content="index, follow">
         <link rel="shortcut icon" href="/favicon.ico">
-        <link rel="stylesheet" href="/assets/css/hyper-layout.css">
-        <link rel="stylesheet" href="/assets/design/styles.css">
-        <link rel="preload" href="/assets/design/pages.html" as="fetch">
-        <title data-simply-field="meta title">SimplyEdit Start</title>
+        <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.17.2.css">
+        <link rel="stylesheet" href="/assets/css/styles.css">
+        <title>Link-Metadata Test Suite</title>
 		<style>
-			/* hyper page incoming/outgoing animation */
-			[data-hyper="outgoing"] {
-				background: red;
+            #qunit {
+                position: relative;
+            }
+			.ds-bg-grey-dark a {
+				color: var(--ds-primary);
 			}
-			[data-hyper="incoming"] {
-				background: green;
-			}
+            .ds-dialog {
+                position:  absolute;
+                top:  50%;
+                transform:  translateY(-50%);
+            }
+            main {
+                max-width:  1400px;
+            }
+            .tests {
+                display:  none;
+            }
 		</style>
     </head>
     <body>
-        <link rel="simply-include" href="/assets/design/pages.html">
-
-        <header class="hyper-layout-sticky hyper-layout-fixed-size">
-            Header
+        <header>
+        	<nav class="ds-navbar ds-navbar-nav ds-button-bar ds-bg-primary">
+	            <div class="ds-navbar-right">
+	            	<button data-simply-command="home" class="ds-button ds-button-primary">
+						<img src="https://pdsinterop.org/logo/monochrome-black.svg" class="ds-icon" alt="">
+	            		Link-Metadata Test Suite
+	            	</button>
+	            </div>
+	        </nav>
         </header>
 
-        <main class="hyper-layout hyper-layout-pages" data-simply-list="hyper-pages" data-simply-data="hyper-pages" data-simply-readonly>
-            <template>
-                <div data-simply-path="/" data-simply-field="data-simply-path" data-simply-content="attributes" data-simply-attributes="data-simply-path" data-simply-transformer="hyper-page">
-                    <div data-simply-field="data-simply-template" data-simply-content="template">
-                        <template data-simply-template="default" rel="default"></template>
-                    </div>
-                </div>
-            </template>
+        <main>
+            <div id="logout">
+                <button class="ds-button ds-button-primary" data-simply-command="logout">Logout</button>
+            </div>
+            <div id="tests-container">
+                <div id="qunit"></div>
+                <div id="qunit-fixture"></div>
+            </div>
         </main>
 
         <footer class="hyper-layout-fixed-size">
-            Footer
         </footer>
 
-        <div class="hyper-layout-layer hyper-layout-fixed-position hyper-hidden hyper-layout-layer-1000 hyper-layout-full-size">
-            
-            <dialog data-simply-dialog="my-dialog" class="hyper-layout-center-both">Dialog <button data-simply-command="closeDialog" data-simply-value="my-dialog">x</button></dialog>
+    	<dialog class="ds-dialog ds-center-center" id="testServerDialog" open>
+            <div class="ds-dialog-header ds-bg-primary">
+                <h2 class="ds-space-horizontal">Enter Solid Server URL</h2>
+            </div>
+            <div class="ds-dialog-content">
+                <form class="ds-space ds-margin-up" data-simply-command="testServer">
+                    <label>URL:
+                        <input type="url" name="url">
+                    </label>
+                    <button class="ds-button ds-button-primary" type="submit">Test</button>
+                </form>
+            </div>
+    		<footer class="ds-dialog-footer ds-bg-grey-dark ">
+    			<div class="ds-space">
+    				This website will test a Solid Server for compliance with the <a href="https://pdsinterop.org/solid-link-metadata/" target="_blank">solid-link-metadata specification</a>.
+    			</div>
+    		</footer>
+        </dialog>
 
-            <div class="hyper-layout-backdrop"></div>
-        </div>
-
-        <script src="/assets/js/simplyview/simply.everything.js"></script>
-        <script src="/assets/js/settings.js"></script>
-        <script src="/assets/js/simplyedit-helper.js"></script>
-        <script src="/assets/js/hyperpages.js"></script>
-        <script src="/assets/js/app/app.js"></script>
+        <dialog class="ds-dialog ds-center-center" id="setIssuer">
+            <button data-simply-command="closeDialog" class="ds-dialog-close ds-button ds-button-light ds-button-close">
+                <svg class="ds-icon ds-icon-feather">
+                    <use xlink:href="/assets/icons/feather-sprite.svg#x-circle">
+                </use></svg>
+            </button>
+            <div class="ds-dialog-header ds-bg-primary">
+                <h2 class="ds-space-horizontal">Login</h2>
+            </div>
+            <div class="ds-dialog-content" id="solid-auth-form">
+                <form class="ds-space ds-margin-up" data-simply-command="login">
+                    <label>Solid WebID:
+                        <input type="url" name="issuer">
+                    </label>
+                    <input type="hidden" name="url" value="" data-simply-field="fetchUrl">
+                    <button class="ds-button ds-button-primary" type="submit">Login</button>
+                </form>
+            </div>
+        </dialog>
+    	<div class="ds-dialog-overlay"></div>
+	
+        <script src="/assets/js/bundle.js"></script>
+		<script src="https://unpkg.com/simplyview@2.0.2/dist/simply.everything.js"></script>
+        <script src="https://code.jquery.com/qunit/qunit-2.17.2.js"></script>
+        <script src="/assets/js/tests.js"></script>
+        <script src="/assets/js/app.js"></script>
     </body>
 </html>
