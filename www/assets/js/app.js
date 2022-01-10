@@ -59,8 +59,9 @@ const app = simply.app({
 			app.view.url = url.href;
 			url.pathname += '.meta';
 			return solidApi.fetch(url.href)
-			.then(store => {
-				app.view.store = store;
+			.then(result => {
+				app.view.store = result.store;
+				app.view.text  = result.text;
 			});
 /*			.then(store => {
 				rawdata = store;
@@ -69,7 +70,12 @@ const app = simply.app({
 */
 		},
 		runtests: function() {
-			QUnit.start();
+			tests.setup().then(() => {
+				QUnit.start();
+			})
+			.catch(e => {
+				alert(e);
+			});
 		}
     },
     view: {
@@ -79,6 +85,8 @@ const app = simply.app({
 const solidSession = getDefaultSession();
 
 const prefixes = {};
+
+const solidSupported = ['text/turtle','application/trig','application/n-quads','application/n-triples','text/n3', 'application/json', 'application/ld+json', 'application/rdf+xml', 'text/html', 'application/xhtml+xml', 'image/svg+xml','application/xml'];
 
 const solidApi = {
     fetch: function(url) {
@@ -99,23 +107,40 @@ const solidApi = {
 			}
 		})
         .then(text => {
-        	console.log('text',text);
-        	rawstring = text;
-        	let store = rdflib.graph();
-			rdflib.parse(text, store, url, contentType);
-			return store;
+        	if (solidSupported.includes(contentType)) {
+	        	let store = rdflib.graph();
+				rdflib.parse(text, store, url, contentType);
+				return { store: store, text: text };
+			} else {
+				return { text: text };
+			}
 		});
     },
     write: function(url, store, contentType='text/turtle') {
-    	let ttl = rdflib.serialize(null, store, url, contentType);
-    	console.log(ttl);
+    	if (typeof store !== 'string' && solidSupported.includes(contentType)) {
+	    	var body = rdflib.serialize(null, store, url, contentType);
+	    } else {
+	    	var body = store;
+	    }
+    	console.log(store);
     	var fetchParams = {
-//    		mode: 'cors',
     		headers: {
     			'Content-Type': contentType
     		},
-    		body: ttl,
+    		body: store,
     		method: 'PUT'
+    	}
+    	return solidSession.fetch(url, fetchParams).then(response => {
+    		if (response.ok) {
+    			return response;
+    		} else {
+    			throw response;
+    		}
+    	});
+    },
+    delete: function(url) {
+    	var fetchParams = {
+    		method: 'DELETE'
     	}
     	return solidSession.fetch(url, fetchParams).then(response => {
     		if (response.ok) {
