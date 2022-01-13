@@ -147,7 +147,6 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Does temporaryRedirect work?', function(assert) {
 		const done = assert.async();
 		tests.temporaryRedirect().then((response) => {
-			console.log(response);
 			assert.equal(response.ok, true);
 			done();
 		});
@@ -155,7 +154,6 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Does permanentRedirect work?', function(assert) {
 		const done = assert.async();
 		tests.permanentRedirect().then((response) => {
-			console.log(response);
 			assert.equal(response.ok, true);
 			done();
 		});
@@ -163,16 +161,14 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Does delete work?', function(assert) {
 		const done = assert.async();
 		tests.forget().then((response) => {
-			console.log(response);
-			assert.equal(response.ok, true);
+			assert.equal(response.status, 404);
 			done();
 		});
 	});
 	QUnit.test('Does forget work?', function(assert) {
 		const done = assert.async();
 		tests.forget().then((response) => {
-			console.log(response);
-			assert.equal(response.ok, true);
+			assert.equal(response.status, 410);
 			done();
 		});
 	});
