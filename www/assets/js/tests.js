@@ -117,6 +117,14 @@ var tests = {
 			}
 		});
 	},
+	writeForget: () => {
+		return solidApi.write(url.href + 'testForget', 'no longer forgotten', 'text/plain')
+		.then(response => {
+			if (response.ok) {
+				return solidApi.fetch(url.href+'testForget');
+			}
+		});
+	},
 	writeTemporaryRedirect: () => {
 		return solidApi.write(url.href + 'testTemporaryRedirect', 'no longer redirected temporary', 'text/plain')
 		.then(response => {
@@ -151,6 +159,7 @@ var tests = {
 	teardown: () => {
 		return Promise.all([
 			solidApi.delete(url.href+'testDeleted'),
+			solidApi.delete(url.href+'testForget'),
 			solidApi.delete(url.href+'testTemporaryRedirect'),
 			solidApi.delete(url.href+'testPermanentRedirect')
 		]);
