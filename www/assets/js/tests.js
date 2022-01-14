@@ -201,12 +201,18 @@ QUnit.module('link-meta', function() {
 		tests.writeDeleted().then((result) => {
 			assert.equal(result.text, 'no longer deleted');
 			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
+			done();
 		});
 	});
 	QUnit.test('Is forget marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeForget().then((result) => {
 			assert.equal(result.text, 'no longer forgotten');
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});
@@ -215,12 +221,18 @@ QUnit.module('link-meta', function() {
 		tests.writeTemporaryRedirect().then((result) => {
 			assert.equal(result.text, 'no longer redirected temporary');
 			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
+			done();
 		});
 	});
 	QUnit.test('Is permanentRedirect marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writePermanentRedirect().then((result) => {
 			assert.equal(result.text, 'no longer redirected permanently');
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});
