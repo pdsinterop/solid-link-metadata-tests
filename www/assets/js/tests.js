@@ -170,15 +170,15 @@ var tests = {
 QUnit.module('link-meta', function() {
 	QUnit.test('Does temporaryRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.temporaryRedirect().then((response) => {
-			assert.equal(response.ok, true);
+		tests.temporaryRedirect().then((result) => {
+            assert.true(result.text && result.text.includes('Redirect Temporary Target'), true);
 			done();
 		});
 	});
 	QUnit.test('Does permanentRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.permanentRedirect().then((response) => {
-			assert.equal(response.ok, true);
+		tests.permanentRedirect().then((result) => {
+			assert.true(result.text && result.text.includes('Redirect Permanent Target'), true);
 			done();
 		});
 	});
