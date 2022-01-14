@@ -7,7 +7,7 @@ const LM    = new rdflib.Namespace('https://purl.org/pdsinterop/link-metadata#')
 var tests = {
 	setup: () => {
 		url = new URL(app.view.url);
-		if (url.pathname.substring(url.pathname.length-2)!='/') {
+		if (url.pathname.substring(url.pathname.length-1)!='/') {
 			url.pathname += '/';
 		}
 		metaUrl = new URL(url.href);
