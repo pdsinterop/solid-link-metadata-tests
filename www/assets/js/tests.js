@@ -15,12 +15,27 @@ var tests = {
 
 		store = app.view.store;
 
+		let testSource = window.location.toString();
+		if (testSource.substring(testSource.length-1)!=='/') {
+			testSource += '/';
+		}
+
+		// Returns a given URL with, with the given path appended.
+		// Only the path is altered, keeping any port number, query-params, etc.
+		function appendPath(uri, path) {
+			const url = new URL(uri);
+
+            url.pathname += path;
+            console.log(url.href);
+            return url.href
+		}
+
 		links.tmpRed         = store.sym(url.href + 'testTempRedirect');
-		links.tmpRedTarget   = store.sym('https://'+window.location.hostname+'/redirect-temporary.html');
+		links.tmpRedTarget   = store.sym(appendPath(testSource, 'redirect-temporary.html'));
 		links.permRed        = store.sym(url.href + 'testPermanentRedirect');
-		links.permRedTarget  = store.sym('https://'+window.location.hostname+'/redirect-permanent.html'); 
+		links.permRedTarget  = store.sym(appendPath(testSource, 'redirect-permanent.html'));
 		links.extraRed       = store.sym(url.href + 'testExtraRedirect');
-		links.extraRedTarget = store.sym('https://'+window.location.hostname+'/redirect-extra.html');
+		links.extraRedTarget = store.sym(appendPath(testSource, 'redirect-extra.html'));
 		links.deleted        = store.sym(url.href + 'testDeleted/');
 		links.forget         = store.sym(url.href + 'testForget/');
 		if (!store.any(links.tmpRed, LM('redirectTemporary'))) {
