@@ -184,7 +184,7 @@ QUnit.module('link-meta', function() {
 	});
 	QUnit.test('Does delete work?', function(assert) {
 		const done = assert.async();
-		tests.forget().then((response) => {
+		tests.deleted().then((response) => {
 			assert.equal(response.status, 404);
 			done();
 		});
