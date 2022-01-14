@@ -38,6 +38,9 @@ const app = simply.app({
         afterLogin: (url) => {
 			app.actions.testServer(url)
 			.then(() => {
+				if (!app.view.store) {
+					throw new Error(url+' is not a valid RDF format');
+				}
 	            document.getElementById('testServerDialog').removeAttribute('open');
 	            app.actions.runtests();
 			})
@@ -101,6 +104,7 @@ const solidApi = {
 		return solidSession.fetch(url).then(response => {
 			if (response.ok) {
 				contentType = response.headers.get('Content-Type');
+	        	contentType = contentType.split(';')[0];
 				return response.text();
 			} else {
                 throw response;
@@ -122,12 +126,12 @@ const solidApi = {
 	    } else {
 	    	var body = store;
 	    }
-    	console.log(store);
+    	console.log(body);
     	var fetchParams = {
     		headers: {
     			'Content-Type': contentType
     		},
-    		body: store,
+    		body: body,
     		method: 'PUT'
     	}
     	return solidSession.fetch(url, fetchParams).then(response => {
