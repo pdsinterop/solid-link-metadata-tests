@@ -173,14 +173,14 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Does temporaryRedirect work?', function(assert) {
 		const done = assert.async();
 		tests.temporaryRedirect().then((result) => {
-            assert.true(result.text && result.text.includes('Redirect Temporary Target'), true);
+            assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Temporary Target'), true);
 			done();
 		});
 	});
 	QUnit.test('Does permanentRedirect work?', function(assert) {
 		const done = assert.async();
 		tests.permanentRedirect().then((result) => {
-			assert.true(result.text && result.text.includes('Redirect Permanent Target'), true);
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Permanent Target'), true);
 			done();
 		});
 	});
@@ -201,7 +201,7 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Is deleted marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeDeleted().then((result) => {
-			assert.equal(result.text, 'no longer deleted');
+            assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer deleted'), true);
 			done();
 		}).catch(response => {
 			assert.equal(response.status, 200);
@@ -211,7 +211,7 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Is forget marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeForget().then((result) => {
-			assert.equal(result.text, 'no longer forgotten');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer forgotten'), true);
 			done();
 		}).catch(response => {
 			assert.equal(response.status, 200);
@@ -221,7 +221,7 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Is temporaryRedirect marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeTemporaryRedirect().then((result) => {
-			assert.equal(result.text, 'no longer redirected temporary');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer redirected temporary'), true);
 			done();
 		}).catch(response => {
 			assert.equal(response.status, 200);
@@ -231,7 +231,7 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Is permanentRedirect marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writePermanentRedirect().then((result) => {
-			assert.equal(result.text, 'no longer redirected permanently');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer redirected permanently'), true);
 			done();
 		}).catch(response => {
 			assert.equal(response.status, 200);
