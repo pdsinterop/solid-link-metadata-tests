@@ -50,7 +50,7 @@ const app = simply.app({
 					document.getElementById('setIssuer').setAttribute('open','open');
 //					app.view.url = values.url;
 				} else {
-					alert(error.message);
+					alert(error.message || 'Could not connect to ' + url + (error.statusText ? ' (' + error.statusText + ')' : ''));
 				}
 			});
 		},
