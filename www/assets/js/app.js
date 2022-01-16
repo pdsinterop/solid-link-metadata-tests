@@ -89,7 +89,7 @@ const solidSession = getDefaultSession();
 
 const prefixes = {};
 
-const solidSupported = ['text/turtle','application/trig','application/n-quads','application/n-triples','text/n3', 'application/json', 'application/ld+json', 'application/rdf+xml', 'text/html', 'application/xhtml+xml', 'image/svg+xml','application/xml'];
+const solidSupported = ['text/turtle','application/trig','application/n-quads','application/n-triples','text/n3', 'application/json', 'application/ld+json', 'application/rdf+xml', 'text/html', 'application/xhtml+xml', 'image/svg+xml','application/xml','application/octet-stream'];
 
 const solidApi = {
     fetch: function(url) {
@@ -113,7 +113,12 @@ const solidApi = {
         .then(text => {
         	if (solidSupported.includes(contentType)) {
 	        	let store = rdflib.graph();
-				rdflib.parse(text, store, url, contentType);
+				if (contentType === "application/octet-stream") {
+                    // Let rdf-lib auto-detect the content type
+					rdflib.parse(text, store, url);
+                } else {
+					rdflib.parse(text, store, url, contentType);
+				}
 				return { store: store, text: text };
 			} else {
 				return { text: text };
