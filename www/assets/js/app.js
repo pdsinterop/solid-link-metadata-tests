@@ -56,7 +56,7 @@ const app = simply.app({
 		},
 		testServer: (url) => {
 			var url = new URL(url);
-			if (url.pathname.substring(url.pathname.length-2)!='/') {
+			if (url.pathname.substring(url.pathname.length-1) !== '/') {
 				url.pathname += '/';
 			}
 			app.view.url = url.href;
