@@ -160,7 +160,11 @@ var tests = {
 			solidApi.delete(url.href+'testForget'),
 			solidApi.delete(url.href+'testTemporaryRedirect'),
 			solidApi.delete(url.href+'testPermanentRedirect')
-		]);
+		]).catch(response => {
+            if (response.status > 399) {
+                throw 'Could not delete test data' + response.statusText;
+            }
+        });
 	}
 
 };
