@@ -183,14 +183,14 @@ QUnit.module('link-meta', function() {
 	QUnit.test('Does delete work?', function(assert) {
 		const done = assert.async();
 		tests.deleted().then((response) => {
-			assert.equal(response.status, 404);
+			assert.equal(response.status || 200, 404);
 			done();
 		});
 	});
 	QUnit.test('Does forget work?', function(assert) {
 		const done = assert.async();
 		tests.forget().then((response) => {
-			assert.equal(response.status, 410);
+			assert.equal(response.status || 200, 410);
 			done();
 		});
 	});
