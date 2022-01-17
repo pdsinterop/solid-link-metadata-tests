@@ -34,8 +34,8 @@ var tests = {
 		links.permRedTarget  = store.sym(appendPath(testSource, 'redirect-permanent.html'));
 		links.extraRed       = store.sym(url.href + 'testExtraRedirect');
 		links.extraRedTarget = store.sym(appendPath(testSource, 'redirect-extra.html'));
-		links.deleted        = store.sym(url.href + 'testDeleted/');
-		links.forget         = store.sym(url.href + 'testForget/');
+		links.deleted        = store.sym(url.href + 'testDeleted');
+		links.forget         = store.sym(url.href + 'testForget');
 		if (!store.any(links.tmpRed, LM('redirectTemporary'))) {
 			store.add(links.tmpRed, LM('redirectTemporary'), links.tmpRedTarget);
 		}
@@ -53,7 +53,7 @@ var tests = {
 		}
 		return solidApi.write(metaUrl.href, store)
 		.catch(response => {
-			if (response.status==401) {
+			if (response.status==401 || response.status==403) {
 				document.getElementById('setIssuer').setAttribute('open','open');
 			}
 		});
@@ -84,7 +84,7 @@ var tests = {
 		});
 	},
 	forget: () => {
-		return solidApi.fetch(url.href + 'testForget/')
+		return solidApi.fetch(url.href + 'testForget')
 		.catch(response => {
 			return response;
 		});
@@ -96,7 +96,9 @@ var tests = {
 		});
 	},
 	deleted: () => {
-		return solidApi.fetch(url.href + 'testDeleted/')
+		return solidApi.fetch(url.href + 'testDeleted', {
+			redirect: 'manual'
+		})
 		.catch(response => {
 			return response;
 		});
@@ -108,7 +110,7 @@ var tests = {
 		});
 	},
 	writeDeleted: () => {
-		return solidApi.write(url.href + 'testDeleted', 'no longer deleted', 'text/plain')
+		return solidApi.write(url.href + 'testDeleted', '#no longer deleted', 'text/plain')
 		.then(response => {
 			if (response.ok) {
 				return solidApi.fetch(url.href+'testDeleted');
@@ -116,7 +118,7 @@ var tests = {
 		});
 	},
 	writeForget: () => {
-		return solidApi.write(url.href + 'testForget', 'no longer forgotten', 'text/plain')
+		return solidApi.write(url.href + 'testForget', '#no longer forgotten', 'text/plain')
 		.then(response => {
 			if (response.ok) {
 				return solidApi.fetch(url.href+'testForget');
@@ -124,15 +126,15 @@ var tests = {
 		});
 	},
 	writeTemporaryRedirect: () => {
-		return solidApi.write(url.href + 'testTemporaryRedirect', 'no longer redirected temporary', 'text/plain')
+		return solidApi.write(url.href + 'testTempRedirect', '#no longer redirected temporary', 'text/plain')
 		.then(response => {
 			if (response.ok) {
-				return solidApi.fetch(url.href+'testTemporaryRedirect');
+				return solidApi.fetch(url.href+'testTempRedirect');
 			}
 		});
 	},
 	writePermanentRedirect: () => {
-		return solidApi.write(url.href + 'testPermanentRedirect', 'no longer redirected permanently', 'text/plain')
+		return solidApi.write(url.href + 'testPermanentRedirect', '#no longer redirected permanently', 'text/plain')
 		.then(response => {
 			if (response.ok) {
 				return solidApi.fetch(url.href+'testPermanentRedirect');
@@ -158,7 +160,7 @@ var tests = {
 		return Promise.all([
 			solidApi.delete(url.href+'testDeleted'),
 			solidApi.delete(url.href+'testForget'),
-			solidApi.delete(url.href+'testTemporaryRedirect'),
+			solidApi.delete(url.href+'testTempRedirect'),
 			solidApi.delete(url.href+'testPermanentRedirect')
 		]).catch(response => {
             if (response.status > 399) {
@@ -168,18 +170,20 @@ var tests = {
 	}
 
 };
-
+QUnit.config.reorder = false;
 QUnit.module('link-meta', function() {
 	QUnit.test('Does temporaryRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.temporaryRedirect().then((result) => {
+		tests.temporaryRedirect()
+		.then((result) => {
             assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Temporary Target'), true);
 			done();
 		});
 	});
 	QUnit.test('Does permanentRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.permanentRedirect().then((result) => {
+		tests.permanentRedirect()
+		.then((result) => {
 			assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Permanent Target'), true);
 			done();
 		});
