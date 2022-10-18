@@ -7,22 +7,35 @@ const LM    = new rdflib.Namespace('https://purl.org/pdsinterop/link-metadata#')
 var tests = {
 	setup: () => {
 		url = new URL(app.view.url);
-		if (url.pathname.substring(url.pathname.length-2)!='/') {
-			url.pathname += '/';
-		}
+
 		metaUrl = new URL(url.href);
 		metaUrl.pathname += '.meta';
 
 		store = app.view.store;
 
+		let testSource = window.location.toString();
+		if (testSource.substring(testSource.length-1)!=='/') {
+			testSource += '/';
+		}
+
+		// Returns a given URL with, with the given path appended.
+		// Only the path is altered, keeping any port number, query-params, etc.
+		function appendPath(uri, path) {
+			const url = new URL(uri);
+
+            url.pathname += path;
+            console.log(url.href);
+            return url.href
+		}
+
 		links.tmpRed         = store.sym(url.href + 'testTempRedirect');
-		links.tmpRedTarget   = store.sym('https://'+window.location.hostname+'/redirect-temporary.html');
+		links.tmpRedTarget   = store.sym(appendPath(testSource, 'redirect-temporary.html'));
 		links.permRed        = store.sym(url.href + 'testPermanentRedirect');
-		links.permRedTarget  = store.sym('https://'+window.location.hostname+'/redirect-permanent.html'); 
+		links.permRedTarget  = store.sym(appendPath(testSource, 'redirect-permanent.html'));
 		links.extraRed       = store.sym(url.href + 'testExtraRedirect');
-		links.extraRedTarget = store.sym('https://'+window.location.hostname+'/redirect-extra.html');
-		links.deleted        = store.sym(url.href + 'testDeleted/');
-		links.forget         = store.sym(url.href + 'testForget/');
+		links.extraRedTarget = store.sym(appendPath(testSource, 'redirect-extra.html'));
+		links.deleted        = store.sym(url.href + 'testDeleted');
+		links.forget         = store.sym(url.href + 'testForget');
 		if (!store.any(links.tmpRed, LM('redirectTemporary'))) {
 			store.add(links.tmpRed, LM('redirectTemporary'), links.tmpRedTarget);
 		}
@@ -40,7 +53,7 @@ var tests = {
 		}
 		return solidApi.write(metaUrl.href, store)
 		.catch(response => {
-			if (response.status==401) {
+			if (response.status==401 || response.status==403) {
 				document.getElementById('setIssuer').setAttribute('open','open');
 			}
 		});
@@ -71,7 +84,7 @@ var tests = {
 		});
 	},
 	forget: () => {
-		return solidApi.fetch(url.href + 'testForget/')
+		return solidApi.fetch(url.href + 'testForget')
 		.catch(response => {
 			return response;
 		});
@@ -83,7 +96,9 @@ var tests = {
 		});
 	},
 	deleted: () => {
-		return solidApi.fetch(url.href + 'testDeleted/')
+		return solidApi.fetch(url.href + 'testDeleted', {
+			redirect: 'manual'
+		})
 		.catch(response => {
 			return response;
 		});
@@ -95,23 +110,31 @@ var tests = {
 		});
 	},
 	writeDeleted: () => {
-		return solidApi.write(url.href + 'testDeleted', 'no longer deleted', 'text/plain')
+		return solidApi.write(url.href + 'testDeleted', '#no longer deleted', 'text/plain')
 		.then(response => {
 			if (response.ok) {
 				return solidApi.fetch(url.href+'testDeleted');
 			}
 		});
 	},
-	writeTemporaryRedirect: () => {
-		return solidApi.write(url.href + 'testTemporaryRedirect', 'no longer redirected temporary', 'text/plain')
+	writeForget: () => {
+		return solidApi.write(url.href + 'testForget', '#no longer forgotten', 'text/plain')
 		.then(response => {
 			if (response.ok) {
-				return solidApi.fetch(url.href+'testTemporaryRedirect');
+				return solidApi.fetch(url.href+'testForget');
+			}
+		});
+	},
+	writeTemporaryRedirect: () => {
+		return solidApi.write(url.href + 'testTempRedirect', '#no longer redirected temporary', 'text/plain')
+		.then(response => {
+			if (response.ok) {
+				return solidApi.fetch(url.href+'testTempRedirect');
 			}
 		});
 	},
 	writePermanentRedirect: () => {
-		return solidApi.write(url.href + 'testPermanentRedirect', 'no longer redirected permanently', 'text/plain')
+		return solidApi.write(url.href + 'testPermanentRedirect', '#no longer redirected permanently', 'text/plain')
 		.then(response => {
 			if (response.ok) {
 				return solidApi.fetch(url.href+'testPermanentRedirect');
@@ -136,67 +159,86 @@ var tests = {
 	teardown: () => {
 		return Promise.all([
 			solidApi.delete(url.href+'testDeleted'),
-			solidApi.delete(url.href+'testTemporaryRedirect'),
+			solidApi.delete(url.href+'testForget'),
+			solidApi.delete(url.href+'testTempRedirect'),
 			solidApi.delete(url.href+'testPermanentRedirect')
-		]);
+		]).catch(response => {
+            if (response.status > 399) {
+                throw 'Could not delete test data' + response.statusText;
+            }
+        });
 	}
 
 };
-
+QUnit.config.reorder = false;
 QUnit.module('link-meta', function() {
 	QUnit.test('Does temporaryRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.temporaryRedirect().then((response) => {
-			assert.equal(response.ok, true);
+		tests.temporaryRedirect()
+		.then((result) => {
+            assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Temporary Target'), true);
 			done();
 		});
 	});
 	QUnit.test('Does permanentRedirect work?', function(assert) {
 		const done = assert.async();
-		tests.permanentRedirect().then((response) => {
-			assert.equal(response.ok, true);
+		tests.permanentRedirect()
+		.then((result) => {
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('Redirect Permanent Target'), true);
 			done();
 		});
 	});
 	QUnit.test('Does delete work?', function(assert) {
 		const done = assert.async();
-		tests.forget().then((response) => {
-			assert.equal(response.status, 404);
+		tests.deleted().then((response) => {
+			assert.equal(response.status || 200, 404);
 			done();
 		});
 	});
 	QUnit.test('Does forget work?', function(assert) {
 		const done = assert.async();
 		tests.forget().then((response) => {
-			assert.equal(response.status, 410);
+			assert.equal(response.status || 200, 410);
 			done();
 		});
 	});
 	QUnit.test('Is deleted marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeDeleted().then((result) => {
-			assert.equal(result.text, 'no longer deleted');
+            assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer deleted'), true);
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});
 	QUnit.test('Is forget marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeForget().then((result) => {
-			assert.equal(result.text, 'no longer forgotten');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer forgotten'), true);
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});
 	QUnit.test('Is temporaryRedirect marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writeTemporaryRedirect().then((result) => {
-			assert.equal(result.text, 'no longer redirected temporary');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer redirected temporary'), true);
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});
 	QUnit.test('Is permanentRedirect marker gone after writing a file?', function(assert) {
 		const done = assert.async();
 		tests.writePermanentRedirect().then((result) => {
-			assert.equal(result.text, 'no longer redirected permanently');
+			assert.true(result.text && typeof result.text === 'string' && result.text.includes('no longer redirected permanently'), true);
+			done();
+		}).catch(response => {
+			assert.equal(response.status, 200);
 			done();
 		});
 	});

@@ -45,18 +45,18 @@ const app = simply.app({
 	            app.actions.runtests();
 			})
 			.catch(error => {
-				if (error.status===401) {
+				if (error.status===401 || error.status===403) {
                     document.getElementById('testServerDialog').removeAttribute('open');
 					document.getElementById('setIssuer').setAttribute('open','open');
 //					app.view.url = values.url;
 				} else {
-					alert(error.message);
+					alert(error.message || 'Could not connect to ' + url + (error.statusText ? ' (' + error.statusText + ')' : ''));
 				}
 			});
 		},
 		testServer: (url) => {
 			var url = new URL(url);
-			if (url.pathname.substring(url.pathname.length-2)!='/') {
+			if (url.pathname.substring(url.pathname.length-1) !== '/') {
 				url.pathname += '/';
 			}
 			app.view.url = url.href;
@@ -65,7 +65,7 @@ const app = simply.app({
 			.then(result => {
 				app.view.store = result.store;
 				app.view.text  = result.text;
-			});
+			})
 /*			.then(store => {
 				rawdata = store;
 				solidApi.write(url.href, store);
@@ -89,19 +89,19 @@ const solidSession = getDefaultSession();
 
 const prefixes = {};
 
-const solidSupported = ['text/turtle','application/trig','application/n-quads','application/n-triples','text/n3', 'application/json', 'application/ld+json', 'application/rdf+xml', 'text/html', 'application/xhtml+xml', 'image/svg+xml','application/xml'];
+const solidSupported = [
+	'text/turtle', 'application/trig', 'application/n-quads', 'application/n-triples',
+	'text/n3', 'application/json', 'application/ld+json', 'application/rdf+xml',
+	'text/html', 'application/xhtml+xml', 'image/svg+xml','application/xml',
+	'application/octet-stream'
+];
 
 const solidApi = {
-    fetch: function(url) {
+    fetch: function(url, fetchParams) {
         const parser = new Parser({blankNodePrefix: '', baseIRI: url});
-		var fetchParams = {
-			mode: 'cors',
-			headers: {
-				'Accept': 'application/*'
-			}
-		};
 		var contentType = '';
-		return solidSession.fetch(url).then(response => {
+		return solidSession.fetch(url, fetchParams)
+		.then(response => {
 			if (response.ok) {
 				contentType = response.headers.get('Content-Type');
 	        	contentType = contentType.split(';')[0];
@@ -113,7 +113,12 @@ const solidApi = {
         .then(text => {
         	if (solidSupported.includes(contentType)) {
 	        	let store = rdflib.graph();
-				rdflib.parse(text, store, url, contentType);
+				if (contentType === "application/octet-stream") {
+                    // Let rdf-lib auto-detect the content type
+					rdflib.parse(text, store, url);
+                } else {
+					rdflib.parse(text, store, url, contentType);
+				}
 				return { store: store, text: text };
 			} else {
 				return { text: text };
